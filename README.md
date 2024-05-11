@@ -1,4 +1,4 @@
-# Live HTML Previewer
+# Live HTML Previewer with Tailwind Support
 This extension allows you to preview your html files in VS Code itself. Use it to quickly set the html and css right for your webpages.
 ##### Note: Javascript is not supported in preview
 ### Features
