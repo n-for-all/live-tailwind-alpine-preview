@@ -3,3 +3,4 @@ node_modules
 .history
 *.vsix
 package-lock.json
+*.txt
