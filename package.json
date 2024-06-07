@@ -2,7 +2,7 @@
 	"name": "live-tailwind-alpine-preview",
 	"displayName": "Live HTML Previewer with Tailwind/Alpine Support",
 	"description": "Edit and preview HTML documents in VS Code with tailwind and alpinejs support",
-	"version": "1.0.0",
+	"version": "1.0.3",
 	"publisher": "n-for-all",
 	"author": "Naji Amer",
 	"engines": {
@@ -82,7 +82,8 @@
 		"compile": "tsc -p ./",
 		"lint": "eslint \"src/**/*.ts\"",
 		"package": "tsc -p ./ && vsce package",
-		"watch": "tsc -watch -p ./"
+		"watch": "tsc -watch -p ./",
+		"publish": "vsce publish"
 	},
 	"dependencies": {
 		"install": "^0.13.0",

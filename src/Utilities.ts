@@ -13,47 +13,40 @@ export default class Utilities {
 		return result;
 	}
 	public static preview(viewColumn: number = vscode.ViewColumn.Two, context: vscode.ExtensionContext, previewUri: vscode.Uri) {
-		if (Utilities.isHTML(true)) {
-			let preview = new Preview();
-			vscode.workspace.registerTextDocumentContentProvider("HTMLPreview", preview.provider);
-			let editor = vscode.window.activeTextEditor;
-			if (editor && editor.document.languageId.toLowerCase() === "html") {
-				let previewDocument = vscode.workspace.openTextDocument(previewUri);
-				previewDocument.then((doc: vscode.TextDocument | null) => {
-					if (!doc) return;
-					let previewPanel: any = vscode.window.createWebviewPanel("njHtmlPreview", `Tailwind Preview`, viewColumn, {
-						enableScripts: true,
-						retainContextWhenHidden: true,
-					});
-					previewPanel.webview.html = Utilities.addTailwindScript(doc.getText());
-					previewPanel.onDidChangeViewState(() => {
-						if (doc && previewPanel.visible) {
-							let currentHTMLContent = doc.getText();
-							previewPanel.webview.html = currentHTMLContent;
-						}
-					});
-
-					const update = (event: vscode.TextDocumentChangeEvent) => {
-						if (doc && event.document === doc) {
-							let currentHTMLContent = Utilities.addTailwindScript(editor.document.getText());
-							previewPanel.webview.html = currentHTMLContent;
-						}
-					};
-					vscode.workspace.onDidChangeTextDocument(update);
-
-					previewPanel.onDidDispose(
-						() => {
-							previewPanel.dispose();
-							previewPanel = null;
-							doc = null;
-						},
-						null,
-						context.subscriptions
-					);
+		let preview = new Preview(previewUri);
+		vscode.workspace.registerTextDocumentContentProvider("njPreview", preview.provider);
+		let editor = vscode.window.activeTextEditor;
+		if (editor) {
+			let previewDocument = vscode.workspace.openTextDocument(previewUri);
+			previewDocument.then((doc: vscode.TextDocument | null) => {
+				if (!doc) return;
+				let previewPanel: any = vscode.window.createWebviewPanel("njHtmlPreview", `Tailwind Preview`, viewColumn, {
+					enableScripts: true,
+					retainContextWhenHidden: true,
 				});
-			} else {
-				vscode.window.showInformationMessage(errorMessage);
-			}
+				previewPanel.webview.html = Utilities.addTailwindScript(doc.getText());
+
+				const update = (event: vscode.TextDocumentChangeEvent) => {
+					if (event.document.fileName === editor.document.fileName) {
+						let currentHTMLContent = Utilities.addTailwindScript(editor.document.getText());
+						previewPanel.webview.html = currentHTMLContent;
+					}
+				};
+				vscode.workspace.onDidChangeTextDocument(update);
+
+				previewPanel.onDidDispose(
+					() => {
+						previewPanel.dispose();
+						previewPanel = null;
+						doc = null;
+						console.log("disposed panel");
+					},
+					null,
+					context.subscriptions
+				);
+			});
+		} else {
+			vscode.window.showInformationMessage(errorMessage);
 		}
 	}
 
