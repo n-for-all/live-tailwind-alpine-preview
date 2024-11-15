@@ -3,10 +3,17 @@ This extension allows you to preview html files with TailwindCSS and AplineJS su
 
 ### Features
 
-* [Support for multiple suggestion](https://gitlab.com/groups/gitlab-org/editor-extensions/-/epics/50) is now on by default.
-* Combine Open in GitLab commands ([5a8d69b](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/5a8d69be15c98715315a4a2a868eb64b6732e283))
-  * Implemented by [Lennard Sprong](https://gitlab.com/X_Sheep) with [MR !1619](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/merge_requests/1619) 👍
-* Telemetry for multiple suggestions ([9bb4e81](https://gitlab.com/gitlab-org/gitlab-vscode-extension/commit/9bb4e81a2b5b45016b8fd87874c813a35d95846f))
+* Live Preview of Any file that may contain html markup (not limited to html)
+* Using Play CDN for tailwind and AlpineJs CDN
+* To support custom tailwind config or plugins 
+
+`window.addEventListener('DOMContentLoaded', function () {
+    tailwind.config = {
+        darkMode: 'class',
+        prefix: 'tw-',
+    }
+});`
+
 
 #### Side preview with live editing (Tailwind and Alpinejs support)
 ![IDE](resources/preview.gif)
