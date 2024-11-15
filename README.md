@@ -7,12 +7,14 @@ This extension allows you to preview html files with TailwindCSS and AplineJS su
 * Using Play CDN for tailwind and AlpineJs CDN
 * To support custom tailwind config or plugins 
 
-```window.addEventListener('DOMContentLoaded', function () {
+```
+window.addEventListener('DOMContentLoaded', function () {
     tailwind.config = {
         darkMode: 'class',
         prefix: 'tw-',
     }
-});```
+});
+```
 
 
 #### Side preview with live editing (Tailwind and Alpinejs support)
