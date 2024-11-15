@@ -8,6 +8,7 @@ export default class StatusBarItem {
     constructor() {
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
         this.statusBarItem.command = "extension.nj.sidePreview";
+        this.statusBarItem.text = "$(open-preview) Tailwind/Alpine";
         this.statusBarItem.tooltip = 'Open Tailwind/Alpine Preview';
     }
 
