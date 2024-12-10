@@ -32,25 +32,25 @@ Click on a .liquid file and click show preview, you will have to add the script 
 ```
 // Add this to either the extension js files setting or in your liquid file (wrap it with <script>)
 window.onLiquid = function (liquidjs) {
-	class ValueDrop extends liquidjs.Drop {
-		scale_max = 1;
-		rating = 10;
-		valueOf() {
-			return this.rating;
-		}
-	}
-	return {
-		product: {
-			metafields: {
-				reviews: {
-					count: 10,
-					rating: {
-						value: new ValueDrop(),
-					},
-				},
-			},
-		},
-	};
+    class ValueDrop extends liquidjs.Drop {
+        scale_max = 1;
+        rating = 10;
+        valueOf() {
+            return this.rating;
+        }
+    }
+    return {
+        product: {
+            metafields: {
+                reviews: {
+                    count: 10,
+                    rating: {
+                        value: new ValueDrop(),
+                    },
+                },
+            },
+        },
+    };
 };
 
 
