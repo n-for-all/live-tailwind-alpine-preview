@@ -2,7 +2,7 @@
 	"name": "live-tailwind-alpine-preview",
 	"displayName": "Live HTML Previewer with Tailwind/Alpine Support",
 	"description": "Edit and preview HTML documents in VS Code with tailwind and alpinejs support",
-	"version": "1.0.9",
+	"version": "1.1.1",
 	"publisher": "n-for-all",
 	"author": "Naji Amer",
 	"engines": {
@@ -41,12 +41,12 @@
 				"live-tailwind-alpine-preview.externalJs": {
 					"type": "string",
 					"default": "",
-					"description": "External Js File (Full Path)"
+					"description": "External Js Files (Full paths, Comma separated)"
 				},
 				"live-tailwind-alpine-preview.externalCSS": {
 					"type": "string",
 					"default": "",
-					"description": "External CSS File (Full Path)"
+					"description": "External CSS Files (Full paths, Comma separated)"
 				}
 			}
 		},

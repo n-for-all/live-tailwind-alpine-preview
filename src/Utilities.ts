@@ -6,138 +6,152 @@ import * as path from "path";
 const errorMessage = "The current editor is not an HTML document.";
 
 export default class Utilities {
-	public static isHTML(showWarning: boolean): boolean {
-		let result = vscode.window.activeTextEditor?.document.languageId.toLowerCase() === "html";
-		if (!result && showWarning) {
-			vscode.window.showInformationMessage(errorMessage);
-		}
-		return result;
-	}
-	public static preview(
-		viewColumn: number = vscode.ViewColumn.Two,
-		context: vscode.ExtensionContext,
-		previewUri: vscode.Uri,
-		settings: {
-			externalJs?: string;
-			externalCSS?: string;
-		}
-	) {
-		let preview = new Preview(previewUri);
-		vscode.workspace.registerTextDocumentContentProvider("njPreview", preview.provider);
-		let editor = vscode.window.activeTextEditor;
-		if (editor) {
-			let log = vscode.window.createOutputChannel("Tailwind/Alpine Preview");
-			let previewDocument = vscode.workspace.openTextDocument(previewUri);
-			previewDocument.then((doc: vscode.TextDocument | null) => {
-				if (!doc) return;
-				let previewPanel: vscode.WebviewPanel | null = vscode.window.createWebviewPanel("njHtmlPreview", `Tailwind Preview`, viewColumn, {
-					enableScripts: true,
-					retainContextWhenHidden: true,
-					localResourceRoots: [vscode.Uri.file(path.join(previewUri.path, "../"))],
-				});
-				previewPanel.webview.html = Utilities.addTailwindScript(context, previewPanel, editor.document.fileName, doc.getText(), settings);
+    public static isHTML(showWarning: boolean): boolean {
+        let result = vscode.window.activeTextEditor?.document.languageId.toLowerCase() === "html";
+        if (!result && showWarning) {
+            vscode.window.showInformationMessage(errorMessage);
+        }
+        return result;
+    }
+    public static preview(
+        viewColumn: number = vscode.ViewColumn.Two,
+        context: vscode.ExtensionContext,
+        previewUri: vscode.Uri,
+        settings: {
+            externalJs?: string;
+            externalCSS?: string;
+        }
+    ) {
+        let preview = new Preview(previewUri);
+        vscode.workspace.registerTextDocumentContentProvider("njPreview", preview.provider);
+        let editor = vscode.window.activeTextEditor;
+        if (editor) {
+            let log = vscode.window.createOutputChannel("Tailwind/Alpine Preview");
+            let previewDocument = vscode.workspace.openTextDocument(previewUri);
+            previewDocument.then((doc: vscode.TextDocument | null) => {
+                if (!doc) return;
+                let previewPanel: vscode.WebviewPanel | null = vscode.window.createWebviewPanel("njHtmlPreview", `Tailwind Preview`, viewColumn, {
+                    enableScripts: true,
+                    retainContextWhenHidden: true,
+                    localResourceRoots: [vscode.Uri.file(path.join(previewUri.path, "../"))],
+                });
+                previewPanel.webview.html = Utilities.addTailwindScript(context, previewPanel, editor.document.fileName, doc.getText(), settings);
 
-				const update = (event: vscode.TextDocumentChangeEvent) => {
-					if (event.document.fileName === editor.document.fileName && previewPanel) {
-						let currentHTMLContent = Utilities.addTailwindScript(context, previewPanel, event.document.fileName, editor.document.getText(), settings);
-						previewPanel.webview.html = currentHTMLContent;
-					}
-				};
-				const disposable = vscode.workspace.onDidChangeTextDocument(update);
+                const update = (event: vscode.TextDocumentChangeEvent) => {
+                    if (event.document.fileName === editor.document.fileName && previewPanel) {
+                        let currentHTMLContent = Utilities.addTailwindScript(context, previewPanel, event.document.fileName, editor.document.getText(), settings);
+                        previewPanel.webview.html = currentHTMLContent;
+                    }
+                };
+                const disposable = vscode.workspace.onDidChangeTextDocument(update);
 
-				var messages: Array<{ message: string; stack: string }> = [];
-				var timeoutId: any = null;
-				previewPanel.webview.onDidReceiveMessage(
-					(message) => {
-						if (message.command == "alert") {
-							messages.push(message);
-							if (timeoutId) {
-								clearTimeout(timeoutId);
-								timeoutId = null;
-							}
-							timeoutId = setTimeout(() => {
-								vscode.window.showErrorMessage(
-									`Aplinejs/Tailwind - ${messages.length} Error${messages.length > 1 ? "s" : ""}: ${messages.map((m) => {
-                                        return m.message.length > 100 ? m.message.substring(0, 283) + "..." : m.message;
-                                    }).join(" ☛☛☛☛☛☛☛☛⚠ ")}`
-								);
-								messages = [];
-							}, 1000);
-						}
-						if (message.message.trim() != "") {
-							log.appendLine(`${new Date().toLocaleString()}: ${message.message}`);
-						}
-						if (message.stack.trim() != "") {
-							log.appendLine(`${new Date().toLocaleString()}: ${message.stack}`);
-						}
-					},
-					undefined,
-					context.subscriptions
-				);
+                var messages: Array<{ message: string; stack: string }> = [];
+                var timeoutId: any = null;
+                previewPanel.webview.onDidReceiveMessage(
+                    (message) => {
+                        if (message.command == "alert") {
+                            messages.push(message);
+                            if (timeoutId) {
+                                clearTimeout(timeoutId);
+                                timeoutId = null;
+                            }
+                            timeoutId = setTimeout(() => {
+                                vscode.window.showErrorMessage(
+                                    `Aplinejs/Tailwind - ${messages.length} Error${messages.length > 1 ? "s" : ""}: ${messages
+                                        .map((m) => {
+                                            return m.message.length > 100 ? m.message.substring(0, 283) + "..." : m.message;
+                                        })
+                                        .join(" ☛☛☛☛☛☛☛☛⚠ ")}`
+                                );
+                                messages = [];
+                            }, 1000);
+                        }
+                        if (message.message.trim() != "") {
+                            log.appendLine(`${new Date().toLocaleString()}: ${message.message}`);
+                        }
+                        if (message.stack.trim() != "") {
+                            log.appendLine(`${new Date().toLocaleString()}: ${message.stack}`);
+                        }
+                    },
+                    undefined,
+                    context.subscriptions
+                );
 
-				previewPanel.onDidDispose(
-					() => {
-						// if (previewPanel && !previewPanel) previewPanel.webview.html = "";
-						disposable?.dispose();
-						// previewPanel?.dispose();
-						previewPanel = null;
-						doc = null;
-					},
-					null,
-					context.subscriptions
-				);
-			});
-		} else {
-			vscode.window.showInformationMessage(errorMessage);
-		}
-	}
+                previewPanel.onDidDispose(
+                    () => {
+                        // if (previewPanel && !previewPanel) previewPanel.webview.html = "";
+                        disposable?.dispose();
+                        // previewPanel?.dispose();
+                        previewPanel = null;
+                        doc = null;
+                    },
+                    null,
+                    context.subscriptions
+                );
+            });
+        } else {
+            vscode.window.showInformationMessage(errorMessage);
+        }
+    }
 
-	public static addTailwindScript(
-		context: vscode.ExtensionContext,
-		panel: vscode.WebviewPanel | null,
-		filename: string,
-		html: string,
-		settings: {
-			externalJs?: string;
-			externalCSS?: string;
-		}
-	): string {
-		let tailwind_script_path = "https://cdn.tailwindcss.com";
-		let tailwind_script: string = `<script src="${tailwind_script_path}"></script>`;
-		const onDiskPath = vscode.Uri.joinPath(context.extensionUri, "resources", "alpine.js");
-		const alpinejs = panel?.webview.asWebviewUri(onDiskPath);
+    public static encodeHtmlEntities(str: string) {
+        const entities: any = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+        };
 
-		let externalJs = settings.externalJs && settings.externalJs.trim() != "" ? panel?.webview.asWebviewUri(vscode.Uri.file(settings.externalJs)) : null;
-		let externalCSS = settings.externalCSS && settings.externalCSS.trim() != "" ? panel?.webview.asWebviewUri(vscode.Uri.file(settings.externalCSS)) : null;
+        return str.replace(/[&<>"']/g, (match) => entities[match]);
+    }
 
-		let additionalJs = "";
+    public static addTailwindScript(
+        context: vscode.ExtensionContext,
+        panel: vscode.WebviewPanel | null,
+        filename: string,
+        html: string,
+        settings: {
+            externalJs?: string;
+            externalCSS?: string;
+        }
+    ): string {
+        let tailwind_script_path = "https://cdn.tailwindcss.com";
+        let tailwind_script: string = `<script src="${tailwind_script_path}"></script>`;
+        const onDiskPath = vscode.Uri.joinPath(context.extensionUri, "resources", "alpine.js");
+        const alpinejs = panel?.webview.asWebviewUri(onDiskPath);
 
-		let parsedOutput = "";
-		if (filename.endsWith(".liquid")) {
-			const onLiquidDiskPath = vscode.Uri.joinPath(context.extensionUri, "resources", "liquid.js");
-			const liquidjs = panel?.webview.asWebviewUri(onLiquidDiskPath);
-			const filePath = path.dirname(filename);
-			const rootDir = panel?.webview.asWebviewUri(vscode.Uri.file(filePath));
+        let externalJs =
+            settings.externalJs && settings.externalJs.trim() != "" ? settings.externalJs.split(",").map((u) => panel?.webview.asWebviewUri(vscode.Uri.file(u))) : null;
+        let externalCSS =
+            settings.externalCSS && settings.externalCSS.trim() != "" ? settings.externalCSS.split(",").map((u) => panel?.webview.asWebviewUri(vscode.Uri.file(u))) : null;
 
-			const fileSnippetsPath = path.join(path.dirname(filename), "../snippets");
-			const rootDirSnippets = panel?.webview.asWebviewUri(vscode.Uri.file(fileSnippetsPath));
-			additionalJs = `<script defer> 
+        let additionalJs = "";
+
+        let parsedOutput = "";
+        if (filename.endsWith(".liquid")) {
+            const onLiquidDiskPath = vscode.Uri.joinPath(context.extensionUri, "resources", "liquid.js");
+            const liquidjs = panel?.webview.asWebviewUri(onLiquidDiskPath);
+            const filePath = path.dirname(filename);
+            const rootDir = panel?.webview.asWebviewUri(vscode.Uri.file(filePath));
+
+            const fileSnippetsPath = path.join(path.dirname(filename), "../snippets");
+            const rootDirSnippets = panel?.webview.asWebviewUri(vscode.Uri.file(fileSnippetsPath));
+            additionalJs = `<script defer> 
                 window.webviewRootMainDir = "${rootDir}"; 
                 window.webviewRootDir = "${rootDirSnippets}"; 
             </script>`;
-			additionalJs += `<script defer src="${liquidjs}"></script>`;
-			parsedOutput = `<script type="text/template" id="liquid">${this.convertLinks(
-				context,
-				panel,
-				filename,
-				html
-			)}</script><div id="result"></div><script src="https://cdn.jsdelivr.net/npm/liquidjs/dist/liquid.browser.min.js"></script>`;
-		} else {
-			parsedOutput = this.convertLinks(context, panel, filename, html);
-		}
+            additionalJs += `<script defer src="${liquidjs}"></script>`;
+            parsedOutput = `<script type="text/template" id="liquid">${Utilities.encodeHtmlEntities(
+                this.convertLinks(context, panel, filename, html)
+            )}</script><div id="result"></div><script src="https://cdn.jsdelivr.net/npm/liquidjs/dist/liquid.browser.min.js"></script>`;
+        } else {
+            parsedOutput = this.convertLinks(context, panel, filename, html);
+        }
 
-		return `
-        ${externalJs ? `<script defer src="${externalJs}"></script>` : ""}${externalCSS ? `<link rel="stylesheet" href="${externalCSS}" />` : ""}
+        return `
+        ${externalJs && externalJs.length ? externalJs.map((s) => `<script defer src="${s}"></script>`).join("") : ""}
+        ${externalCSS && externalCSS.length ? externalCSS.map((s) => `<link rel="stylesheet" href="${s}" />`).join("") : ""}
         ${parsedOutput}${tailwind_script}
         <script defer src="${alpinejs}"></script>
             <script>
@@ -218,31 +232,31 @@ export default class Utilities {
 
             }())
             </script>${additionalJs}`;
-	}
+    }
 
-	public static convertLinks(context: vscode.ExtensionContext, panel: vscode.WebviewPanel | null, filename: string, html: string): string {
-		if (!filename || !html) return html;
-		try {
-			return html.replace(
-				new RegExp("( (?:src=['\"])|<link.*(?:href=['\"]))((?!http|\\/).*?)(['\"])", "gmi"),
-				(subString: string, p1: string, p2: string, p3: string): string => {
-					try {
-						if (p2.startsWith("file://")) {
-							p2 = p2.replace(/^file:\/\//gi, "");
-						}
-						if (p2.startsWith("#") || p2.startsWith("https://") || p2.startsWith("http://") || p2.trim() === "") {
-							return subString;
-						}
+    public static convertLinks(context: vscode.ExtensionContext, panel: vscode.WebviewPanel | null, filename: string, html: string): string {
+        if (!filename || !html) return html;
+        try {
+            return html.replace(
+                new RegExp("( (?:src=['\"])|<link.*(?:href=['\"]))((?!http|\\/).*?)(['\"])", "gmi"),
+                (subString: string, p1: string, p2: string, p3: string): string => {
+                    try {
+                        if (p2.startsWith("file://")) {
+                            p2 = p2.replace(/^file:\/\//gi, "");
+                        }
+                        if (p2.startsWith("#") || p2.startsWith("https://") || p2.startsWith("http://") || p2.trim() === "") {
+                            return subString;
+                        }
 
-						const onDiskPath = vscode.Uri.file(path.join(path.dirname(filename), p2));
-						return [p1, panel?.webview.asWebviewUri(onDiskPath).toString() || "", p3].join("");
-					} catch (e) {
-						return subString;
-					}
-				}
-			);
-		} catch (e) {
-			return html;
-		}
-	}
+                        const onDiskPath = vscode.Uri.file(path.join(path.dirname(filename), p2));
+                        return [p1, panel?.webview.asWebviewUri(onDiskPath).toString() || "", p3].join("");
+                    } catch (e) {
+                        return subString;
+                    }
+                }
+            );
+        } catch (e) {
+            return html;
+        }
+    }
 }

@@ -80,7 +80,11 @@ If a HTML file is open, an icon is displayed on the Status Bar in bottom left. C
 
 ## Changelog
 
-### [1.0.9](https://github.com/n-for-all/live-tailwind-alpine-preview) Support for Liquid Language (2024-10-15)
+### [1.1.1](https://github.com/n-for-all/live-tailwind-alpine-preview) Fixes for liquid attributes (2024-12-10)
+
+### [1.1.0](https://github.com/n-for-all/live-tailwind-alpine-preview) Support for multiple js and css files to be included (2024-12-10)
+
+### [1.0.9](https://github.com/n-for-all/live-tailwind-alpine-preview) Support for Liquid Language (2024-12-10)
 
 ### [1.0.8](https://github.com/n-for-all/live-tailwind-alpine-preview) Fixes and changes (2024-10-15)
 
