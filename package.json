@@ -2,7 +2,7 @@
 	"name": "live-tailwind-alpine-preview",
 	"displayName": "Live HTML Previewer with Tailwind/Alpine Support",
 	"description": "Edit and preview HTML documents in VS Code with tailwind and alpinejs support",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"publisher": "n-for-all",
 	"author": "Naji Amer",
 	"engines": {
@@ -32,18 +32,36 @@
 	},
 	"license": "MIT",
 	"icon": "resources/icon.png",
-	"activationEvents": [
-	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration": {
+			"type": "object",
+			"title": "Tailwind/AlpineJs Preview Settings",
+			"properties": {
+				"live-tailwind-alpine-preview.externalJs": {
+					"type": "string",
+					"default": "",
+					"description": "External Js File (Full Path)"
+				},
+				"live-tailwind-alpine-preview.externalCSS": {
+					"type": "string",
+					"default": "",
+					"description": "External CSS File (Full Path)"
+				}
+			}
+		},
 		"commands": [
 			{
 				"command": "extension.nj.sidePreview",
-				"title": "Show tailwind side preview"
+				"title": "Show Tailwind/AlpineJs Side Preview"
 			},
 			{
 				"command": "extension.nj.fullPreview",
-				"title": "Show tailwind full preview"
+				"title": "Show Tailwind/AlpineJs Full Preview"
+			},
+			{
+				"command": "live-tailwind-alpine-preview.openSettings",
+				"title": "Open Tailwind/AlpineJs Preview Settings"
 			}
 		],
 		"menus": {
@@ -77,6 +95,9 @@
 			}
 		]
 	},
+	"activationEvents": [
+		"onCommand:live-tailwind-alpine-preview.openSettings"
+	],
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
